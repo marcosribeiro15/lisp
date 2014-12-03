@@ -1,0 +1,90 @@
+
+-- File Name : IPC-COMMUNICATION-MIB
+-- Date      : Sat Nov 04 09:56:01 GMT+00:00 2000
+-- Author    : AdventNet Agent Toolkit - MibEditor 4.1
+
+IPC-COMMUNICATION-MIB	DEFINITIONS ::= BEGIN
+	IMPORTS
+		enterprises, MODULE-IDENTITY, OBJECT-TYPE, TimeTicks
+			FROM SNMPv2-SMI
+		RowStatus
+			FROM SNMPv2-TC;
+
+	adventnet	MODULE-IDENTITY
+		LAST-UPDATED	"200011040944Z"
+		ORGANIZATION	"Organization "
+		CONTACT-INFO	"Contact-info"
+		DESCRIPTION		
+				"Description"
+		REVISION		"200011040944Z"
+		DESCRIPTION		
+				""
+		::=  {  enterprises  1  }
+
+	enterprises	OBJECT IDENTIFIER
+		::=  {  private  1  }
+
+	ipcCom	OBJECT IDENTIFIER
+		::=  {  adventnet  1  }
+
+	ipcTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  IpcEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	
+			"Description"
+		::=  { ipcCom  1 }
+
+	ipcEntry	OBJECT-TYPE
+		SYNTAX		IpcEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	
+			"Row Description"
+		INDEX		{  ipcIdx  }
+		::=  { ipcTable 1 }
+
+	IpcEntry  ::=  SEQUENCE {
+		ipcIdx  INTEGER,
+		ipcCount  INTEGER,
+		ipcTime  TimeTicks,
+		ipcStatus  RowStatus
+		}
+
+
+	ipcIdx	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  ipcEntry  1  }
+
+
+	ipcCount	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  ipcEntry  2  }
+
+
+	ipcTime	OBJECT-TYPE	
+		SYNTAX			TimeTicks
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  ipcEntry  3  }
+
+
+	ipcStatus	OBJECT-TYPE	
+		SYNTAX			RowStatus
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  ipcEntry  4  }
+
+END

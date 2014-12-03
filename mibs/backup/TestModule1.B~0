@@ -1,0 +1,18 @@
+TestModule1	DEFINITIONS ::= BEGIN
+IMPORTS
+		 enterprises, MODULE-IDENTITY 
+		FROM SNMPv2-SMI;
+
+moduleIdentity	MODULE-IDENTITY
+LAST-UPDATED	"201402231720Z"
+ORGANIZATION	"Organization "
+CONTACT-INFO	"Contact-info"
+DESCRIPTION	"Description"
+REVISION	"201402231720Z"
+DESCRIPTION	""
+::=	{	enterprises	1
+	 }
+
+
+
+END 

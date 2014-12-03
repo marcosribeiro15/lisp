@@ -1,0 +1,682 @@
+
+-- File Name : AGENT-TL1-CONFIG-MIB
+-- Date      : Tue Feb 18 10:43:19 GMT+05:30 2003
+-- Author    : AdventNet Agent Toolkit C Edition - MibEditor 6.0
+
+
+
+AGENT-TL1-CONFIG-MIB	DEFINITIONS ::= BEGIN
+	IMPORTS
+		InetAddressType, InetAddress
+			FROM INET-ADDRESS-MIB
+		DisplayString, RowStatus, TEXTUAL-CONVENTION, TruthValue, DateAndTime
+			FROM SNMPv2-TC
+		enterprises, DisplayString
+			FROM RFC1213-MIB
+		enterprises, MODULE-IDENTITY, OBJECT-IDENTITY, OBJECT-TYPE, TimeTicks, IpAddress, Integer32
+			FROM SNMPv2-SMI;
+
+	adventnet	MODULE-IDENTITY
+		LAST-UPDATED	"9912180051Z"
+		ORGANIZATION	"AdventNet Inc"
+		CONTACT-INFO	"
+						AdventNet, Inc.
+						4900 Hopyard Road, Suite 115
+						Pleasanton, CA 94588 USA 
+
+						Phone: +1-925-924-9500 
+						Fax: +1-925-924-9600
+
+						AdventNet Development Center (I) Pvt. Ltd.,
+						11, Sarathy Nagar,
+						Vijayanagar,
+						Velachery,
+						Chennai - 600 042
+						Tamil Nadu
+						INDIA
+
+						Phone: +91 44 2243 1115
+
+						Email: cagent-support@webnms.com"
+		DESCRIPTION		"This MIB contains management information of AdventNet
+				Agent Toolkit C Edition runtime agent. This MIB is
+				used to monitor and manage the C run time agent which
+				supports SNMP, HTTP and TL1 protocols."
+		REVISION		"9912180051Z"
+		DESCRIPTION		""
+		::=  {  enterprises  2162  }
+
+-- TEXTUAL-CONVENTIONS --
+	TL1CommunicationInterface ::= TEXTUAL-CONVENTION 
+		DISPLAY-HINT	""
+		STATUS			current
+		DESCRIPTION
+			"An idenitifier that uniquely identifies the 
+						communication interface  supported by the TL1 agent.
+						The values of TL1CommunicationInterface are:
+
+						- Value 1 denotes TCP/IP protocol.
+
+						- Value 2 denotes UDP/IP protocol.
+
+						- Value 3 denotes Craft Interface.
+
+						- Value 4 denotes X.25 protoocol.
+
+						- Value 5 denotes Others."
+		SYNTAX 			INTEGER  { tcp-ip ( 1 ) , udp-ip ( 2 ) , craft-interface ( 3 ) , x-25 ( 4 ) , others ( 5 ) } 
+
+	TcpConnectionState ::= TEXTUAL-CONVENTION 
+		DISPLAY-HINT	""
+		STATUS			current
+		DESCRIPTION
+			"The TCP/IP connection stated used in tcpConnTable.
+
+						If its value is Operational that means the particular 
+						connection is active, it will accept new connection 
+						and process requests.
+
+						If it is blocked that means the particular connection 
+						is not operational time being, so it can't accept any 
+						new connection and will not process any requests."
+		SYNTAX 			INTEGER  { operational ( 1 ) , blocked ( 2 ) } 
+
+	ProtocolAdminStatus ::= TEXTUAL-CONVENTION 
+		DISPLAY-HINT	""
+		STATUS			current
+		DESCRIPTION
+			"An identifier that uniquely identifies the	
+						Admiministrative operation performed by the manager 
+						in a protocol adapter (SNMP, TL1 and HTTP). The 
+						values of Administrative Operation status are:
+						
+						- Value 0 denotes that a particular protocol 
+						adapter's operations should be stopped. 
+						
+						- Value 1 denotes a particualar protocol
+						adapter's operations shuould be started or resumed.
+
+						- Value 2 denotes a particualar protocol
+						adapter's operations shuould be stopped first then
+						should be started immediately."
+		SYNTAX 			INTEGER  { stop ( 0 ) , start ( 1 ) , restart ( 2 ) } 
+
+	ProtocolOperStatus ::= TEXTUAL-CONVENTION 
+		DISPLAY-HINT	""
+		STATUS			current
+		DESCRIPTION
+			"An identifier that uniquely identifies the	operational
+						status of each protocol (SNMP, TL1 and HTTP). The values
+						of Operation status are:
+						
+						- Value 0 denotes that a particular protocol 
+						adapter is not running or is not active. 
+						
+						- Value 1 denotes a particualr prtocol
+						is functionaly active and it will accept the 
+						requests from the manager and process them."
+		SYNTAX 			INTEGER  { not-running ( 0 ) , running ( 1 ) } 
+
+	org	OBJECT IDENTIFIER
+		::=  {  iso  3  }
+
+	dod	OBJECT IDENTIFIER
+		::=  {  org  6  }
+
+	internet	OBJECT IDENTIFIER
+		::=  {  dod  1  }
+
+	private	OBJECT IDENTIFIER
+		::=  {  internet  4  }
+
+	enterprises	OBJECT IDENTIFIER
+		::=  {  private  1  }
+
+	products	OBJECT IDENTIFIER
+		::=  {  adventnet  10  }
+
+	cagent	OBJECT-IDENTITY
+		STATUS			current
+		DESCRIPTION		"The Agent Toolkit (C Edition) is a rapid prototyping and 
+				development tool for building ANSI C based agents best 
+				suited for device and System Management. The toolkit 
+				supports to provide common instrumentation on the agent 
+				and support multiple protocols for management of the agent. 
+				The protocols that are currently supported in this release 
+				are SNMP, TL1 and HTTP."
+		REFERENCE		"The Agent Toolkit (C Edition) is a rapid prototyping and 
+				development tool for building ANSI C based agents best 
+				suited for device and System Management. The toolkit 
+				supports to provide common instrumentation on the agent 
+				and support multiple protocols for management of the agent. 
+				The protocols that are currently supported in this release 
+				are SNMP, TL1 and HTTP."
+		::=  {  products  2  }
+
+	protocols	OBJECT IDENTIFIER
+		::=  {  cagent  2  }
+
+	tl1	OBJECT IDENTIFIER
+		::=  {  protocols  3  }
+
+	tl1Version	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"TL1 agent (adapter) version."
+		::=  {  tl1  1  }
+
+	tl1UpTime	OBJECT-TYPE	
+		SYNTAX			TimeTicks
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"TL1 agent(adapter) uptime in hundredths second."
+		::=  {  tl1  2  }
+
+	tl1OperStatus	OBJECT-TYPE	
+		SYNTAX			ProtocolOperStatus
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"TL1 agent (adapter) status, if it is one (1) it means 
+				TL1 agent is running. If it is zero (0) it means TL1 
+				agent is not running."
+		::=  {  tl1  3  }
+
+	tl1CommIfcTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  Tl1CommIfcEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"TL1 agent can support more than one transport
+			protocol support like TCP/IP, Serial port, X.25, etc
+			This table is used to list out the supported
+			transport protocols in the TL1 agent."
+		::=  { tl1  4 }
+
+	tl1CommIfcEntry	OBJECT-TYPE
+		SYNTAX		Tl1CommIfcEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each entry in this table describes about one supported 
+				transport protocol of TL1 agent."
+		INDEX		{  tl1CommIfcIndex  }
+		::=  { tl1CommIfcTable 1 }
+
+	Tl1CommIfcEntry  ::=  SEQUENCE {
+		tl1CommIfcIndex  Integer32,
+		tl1CommIfcType  TL1CommunicationInterface,
+		tl1CommIfcInfo  DisplayString
+		}
+
+
+	tl1CommIfcIndex	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"TL1 communication interface index, it is just a numeric 
+				value which will be assigned during row creation."
+		::=  {  tl1CommIfcEntry  1  }
+
+
+	tl1CommIfcType	OBJECT-TYPE	
+		SYNTAX			TL1CommunicationInterface
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The supported TL1 communication interface type between NE and OSS."
+		::=  {  tl1CommIfcEntry  2  }
+
+
+	tl1CommIfcInfo	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Detailed information about the supported TL1 transport protocol."
+		::=  {  tl1CommIfcEntry  3  }
+
+	tl1TcpTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  Tl1TcpEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Contains information about TCP/IP communication interface
+			supported by the TL1 agent. By default TCP/IP interface is
+			supported in the agent. Also the agent will support more than
+			one connection (port number) to access agent data. This table
+			contains all supported connection information"
+		::=  { tl1  5 }
+
+	tl1tcpEntry	OBJECT-TYPE
+		SYNTAX		Tl1TcpEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Each row stores one TCP/IP connection information like port number
+			IP address, Operational status, etc."
+		INDEX		{ tcpConnType, tcpConnIpAddress, tcpConnPortNumber  }
+		::=  { tl1TcpTable 1 }
+
+	Tl1TcpEntry  ::=  SEQUENCE {
+		tcpConnType       InetAddressType,
+		tcpConnIpAddress  InetAddress,
+		tcpConnPortNumber  Integer32,
+		tcpConnStatus  TcpConnectionState
+		}
+	
+	
+	tcpConnType	OBJECT-TYPE	
+		SYNTAX			InetAddressType
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The AddressType for the host."
+		DEFVAL			{ 1 }
+		::=  {  tl1tcpEntry  1  }
+
+	tcpConnIpAddress	OBJECT-TYPE	
+		SYNTAX			InetAddress
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"IP address used for this connection."
+		::=  {  tl1tcpEntry  2  }
+
+
+	tcpConnPortNumber	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"Port number used for this connection."
+		::=  {  tl1tcpEntry  3  }
+
+
+	tcpConnStatus	OBJECT-TYPE	
+		SYNTAX			TcpConnectionState
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"The state of this TCP/IP connection. The state will be either
+				Operational or Blocked."
+		::=  {  tl1tcpEntry  4  }
+
+	tl1UserSecurityTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  Tl1UserSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"user security view details"
+		::=  { tl1  6 }
+
+	userSecurityviewEntry	OBJECT-TYPE
+		SYNTAX		Tl1UserSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Row Description"
+		INDEX		{  userID  }
+		::=  { tl1UserSecurityTable 1 }
+
+	Tl1UserSecurityEntry  ::=  SEQUENCE {
+		userID  DisplayString,
+		status  TruthValue,
+		password  DisplayString,
+		page  Integer32,
+		pcnd  Integer32,
+		pcnn  Integer32,
+		point  Integer32,
+		uout  Integer32,
+		cidlist  DisplayString,
+		uap  DisplayString,
+		lstoilist  DisplayString,
+		userSecurowstatus  RowStatus
+		}
+
+
+	userID	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"user name"
+		::=  {  userSecurityviewEntry  1  }
+
+
+	status	OBJECT-TYPE	
+		SYNTAX			TruthValue
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"in/out of service"
+		::=  {  userSecurityviewEntry  2  }
+
+
+	password	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"password  for username"
+		::=  {  userSecurityviewEntry  3  }
+
+
+	page	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"password ageing interval"
+		::=  {  userSecurityviewEntry  4  }
+
+
+	pcnd	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"no of days after page"
+		::=  {  userSecurityviewEntry  5  }
+
+
+	pcnn	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"no of sessions after page"
+		::=  {  userSecurityviewEntry  6  }
+
+
+	point	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"password obsolesance interval"
+		::=  {  userSecurityviewEntry  7  }
+
+
+	uout	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"user ID ageing due to inactiveness"
+		::=  {  userSecurityviewEntry  8  }
+
+
+	cidlist	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"list of channels accessible"
+		::=  {  userSecurityviewEntry  9  }
+
+
+	uap	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"user access previlages"
+		::=  {  userSecurityviewEntry  10  }
+
+
+	lstoilist	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"lstoi"
+		::=  {  userSecurityviewEntry  11  }
+
+
+	userSecurowstatus	OBJECT-TYPE	
+		SYNTAX			RowStatus  { active ( 1 ) , notInService ( 2 ) , notReady ( 3 ) , createAndGo ( 4 ) , createAndWait ( 5 ) , destroy ( 6 ) } 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"Description"
+		::=  {  userSecurityviewEntry  12  }
+
+	tl1ChannelSecurityTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  Tl1ChannelSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"channel view details"
+		::=  { tl1  7 }
+
+	tl1ChannelSecurityEntry	OBJECT-TYPE
+		SYNTAX		Tl1ChannelSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Row Description"
+		INDEX		{  channelID  }
+		::=  { tl1ChannelSecurityTable 1 }
+
+	Tl1ChannelSecurityEntry  ::=  SEQUENCE {
+		channelID  DisplayString,
+		channelstatus  TruthValue,
+		maxinv  Integer32,
+		dural  DisplayString,
+		tmout  Integer32,
+		chap  DisplayString,
+		chnlrowStatus  RowStatus
+		}
+
+
+	channelID	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"channel name"
+		::=  {  tl1ChannelSecurityEntry  1  }
+
+
+	channelstatus	OBJECT-TYPE	
+		SYNTAX			TruthValue
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"in/out of service"
+		::=  {  tl1ChannelSecurityEntry  2  }
+
+
+	maxinv	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"max no. of  intrusions allowed"
+		::=  {  tl1ChannelSecurityEntry  3  }
+
+
+	dural	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"duration of lockout"
+		::=  {  tl1ChannelSecurityEntry  4  }
+
+
+	tmout	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"duration of  session inactiveness allowed"
+		::=  {  tl1ChannelSecurityEntry  5  }
+
+
+	chap	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"channel access previlage"
+		::=  {  tl1ChannelSecurityEntry  6  }
+
+
+	chnlrowStatus	OBJECT-TYPE	
+		SYNTAX			RowStatus  { active ( 1 ) , notInService ( 2 ) , notReady ( 3 ) , createAndGo ( 4 ) , createAndWait ( 5 ) , destroy ( 6 ) } 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"Column Description"
+		::=  {  tl1ChannelSecurityEntry  7  }
+
+	tl1CommandSecurityTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  Tl1CommandSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"command security view details"
+		::=  { tl1  8 }
+
+	tl1CommandSecurityEntry	OBJECT-TYPE
+		SYNTAX		Tl1CommandSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Row Description"
+		INDEX		{  command  }
+		::=  { tl1CommandSecurityTable 1 }
+
+	Tl1CommandSecurityEntry  ::=  SEQUENCE {
+		command  DisplayString,
+		cmdstatus  TruthValue,
+		cap  DisplayString,
+		cmdrowStatus  RowStatus
+		}
+
+
+	command	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"command code"
+		::=  {  tl1CommandSecurityEntry  1  }
+
+
+	cmdstatus	OBJECT-TYPE	
+		SYNTAX			TruthValue
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"in/out of service"
+		::=  {  tl1CommandSecurityEntry  2  }
+
+
+	cap	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"command access previlages"
+		::=  {  tl1CommandSecurityEntry  3  }
+
+
+	cmdrowStatus	OBJECT-TYPE	
+		SYNTAX			RowStatus  { active ( 1 ) , notInService ( 2 ) , notReady ( 3 ) , createAndGo ( 4 ) , createAndWait ( 5 ) , destroy ( 6 ) } 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"Column Description"
+		::=  {  tl1CommandSecurityEntry  4  }
+
+	tl1OperationSecurityTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  Tl1OperationSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"operation security view details"
+		::=  { tl1  9 }
+
+	tl1OperationSecurityEntry	OBJECT-TYPE
+		SYNTAX		Tl1OperationSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Row Description"
+		INDEX		{  aid, view  }
+		::=  { tl1OperationSecurityTable 1 }
+
+	Tl1OperationSecurityEntry  ::=  SEQUENCE {
+		view  DisplayString,
+		aid  DisplayString,
+		operationStatus  TruthValue,
+		rciList  DisplayString,
+		fapList  DisplayString,
+		operationRowStatus  RowStatus
+		}
+
+
+	view	OBJECT-TYPE	
+		SYNTAX			DisplayString  ( SIZE ( 0 .. 255  ) ) 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"view name"
+		::=  {  tl1OperationSecurityEntry  1  }
+
+
+	aid	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"resource name"
+		::=  {  tl1OperationSecurityEntry  2  }
+
+
+	operationStatus	OBJECT-TYPE	
+		SYNTAX			TruthValue
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"in/out of service"
+		::=  {  tl1OperationSecurityEntry  3  }
+
+
+	rciList	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"list of channels/users allowed"
+		::=  {  tl1OperationSecurityEntry  4  }
+
+
+	fapList	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"field acces previlage list"
+		::=  {  tl1OperationSecurityEntry  5  }
+
+
+	operationRowStatus	OBJECT-TYPE	
+		SYNTAX			RowStatus  { active ( 1 ) , notInService ( 2 ) , notReady ( 3 ) , createAndGo ( 4 ) , createAndWait ( 5 ) , destroy ( 6 ) } 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"Column Description"
+		::=  {  tl1OperationSecurityEntry  6  }
+
+	tl1ResourceSecurityTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  Tl1ResourceSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"resource access security details"
+		::=  { tl1  10 }
+
+	tl1ResourceSecurityEntry	OBJECT-TYPE
+		SYNTAX		Tl1ResourceSecurityEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	"Row Description"
+		INDEX		{  resource  }
+		::=  { tl1ResourceSecurityTable 1 }
+
+	Tl1ResourceSecurityEntry  ::=  SEQUENCE {
+		resource  DisplayString,
+		resourceStatus  TruthValue,
+		rapList  DisplayString,
+		resourceRowstatus  RowStatus
+		}
+
+
+	resource	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"resource name"
+		::=  {  tl1ResourceSecurityEntry  1  }
+
+
+	resourceStatus	OBJECT-TYPE	
+		SYNTAX			TruthValue
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"in/out of service"
+		::=  {  tl1ResourceSecurityEntry  2  }
+
+
+	rapList	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"resource access previlage list"
+		::=  {  tl1ResourceSecurityEntry  3  }
+
+
+	resourceRowstatus	OBJECT-TYPE	
+		SYNTAX			RowStatus  { active ( 1 ) , notInService ( 2 ) , notReady ( 3 ) , createAndGo ( 4 ) , createAndWait ( 5 ) , destroy ( 6 ) } 
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		"Column Description"
+		::=  {  tl1ResourceSecurityEntry  4  }
+
+END

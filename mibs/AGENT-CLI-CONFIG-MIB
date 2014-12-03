@@ -1,0 +1,398 @@
+
+-- File Name : AGENT-CLI-CONFIG-MIB
+-- Date      : Tue Sep 15 12:07:12 GMT+05:30 2002
+-- Author    : AdventNet Agent Toolkit C Edition 6
+
+AGENT-CLI-CONFIG-MIB    DEFINITIONS ::= BEGIN
+        IMPORTS
+		InetAddressType, InetAddress
+			FROM INET-ADDRESS-MIB
+                DisplayString, RowStatus, TEXTUAL-CONVENTION
+                        FROM SNMPv2-TC
+                enterprises, DisplayString
+                        FROM RFC1213-MIB
+                enterprises, MODULE-IDENTITY, OBJECT-IDENTITY, OBJECT-TYPE, TimeTicks, IpAddress, Integer32
+                        FROM SNMPv2-SMI;
+
+        adventnet       MODULE-IDENTITY
+                LAST-UPDATED    "9912180051Z"
+                ORGANIZATION    "AdventNet Inc"
+                CONTACT-INFO    "
+                                                AdventNet, Inc.
+                                                4900 Hopyard Road, Suite 310
+                                                Pleasanton, CA 94588 USA
+
+                                                Phone: +1-925-924-9500
+                                                Fax: +1-925-924-9600
+
+                                                AdventNet Development Center (I) Pvt. Ltd.,
+                                                11, Sarathy Nagar,
+                                                Vijaya Nagar,
+                                                Velachery,
+                                                Chennai - 600 042
+                                                Tamil Nadu
+                                                INDIA
+
+                                                Phone: +91 44 243 1215
+
+                                                Email: cagent-support@webnms.com"
+                DESCRIPTION
+                        "This MIB contains management information of AdventNet
+                                Agent Toolkit C Edition runtime agent. This MIB is
+                                used to monitor and manage the C run time agent which
+                                supports SNMP, HTTP TL1 and CLI protocols."
+                REVISION                "9912180051Z"
+                DESCRIPTION
+                        ""
+                ::=  {  enterprises  2162  }
+
+-- TEXTUAL-CONVENTIONS --
+        CLICommunicationInterface ::= TEXTUAL-CONVENTION
+                STATUS                  current
+                DESCRIPTION
+                        "An idenitifier that uniquely identifies the
+                                                communication interface  supported by the CLI agent.
+                                                The values of CLICommunicationInterface are:
+
+                                                - Value 1 denotes TCP/IP protocol.
+
+                                                - Value 2 denotes UDP/IP protocol.
+
+                                                - Value 3 denotes Craft Interface.
+
+                                                - Value 4 denotes Telnet Interface.
+
+                                                - Value 5 denotes Serial Interface."
+                SYNTAX                  INTEGER  { tcpip ( 1 ) , udpip ( 2 ) , craft ( 3 ) , telnet ( 4 ) , serial ( 5 ) }
+
+        CLITcpConnectionState ::= TEXTUAL-CONVENTION
+                STATUS                  current
+                DESCRIPTION
+                        "The TCP/IP connection stated used in tcpConnTable.
+
+                                                If its value is Operational that means the particular
+                                                connection is active, it will accept new connection
+                                                and process requests.
+
+                                                If it is blocked that means the particular connection
+                                                is not operational time being, so it can't accept any
+                                                new connection and will not process any requests."
+                SYNTAX                  INTEGER  { operational ( 1 ) , blocked ( 2 ) }
+
+        CLIProtocolOperStatus ::= TEXTUAL-CONVENTION
+                STATUS                  current
+                DESCRIPTION
+                        "An identifier that uniquely identifies the     operational
+                                                status of each protocol (SNMP, TL1, HTTP and CLI).
+                                                The values of Operation status are:
+
+                                                - Value 0 denotes that a particular protocol
+                                                adapter is not running or is not active.
+
+                                                - Value 1 denotes a particualr prtocol
+                                                is functionaly active and it will accept the
+                                                requests from the manager and process them."
+                SYNTAX                  INTEGER  { notrunning ( 0 ) , running ( 1 ) }
+
+
+--
+-- To create a complete MIB tree.
+--
+
+        org     OBJECT IDENTIFIER
+                ::=  {  iso  3  }
+
+        dod     OBJECT IDENTIFIER
+                ::=  {  org  6  }
+
+        internet        OBJECT IDENTIFIER
+                ::=  {  dod  1  }
+
+        private OBJECT IDENTIFIER
+                ::=  {  internet  4  }
+
+        enterprises     OBJECT IDENTIFIER
+                ::=  {  private  1  }
+
+
+--
+-- The various groups defined within this MIB definition:
+--
+
+        products        OBJECT IDENTIFIER
+                ::=  {  adventnet  10  }
+
+        cagent  OBJECT-IDENTITY
+                STATUS                  current
+                DESCRIPTION
+                        "The Agent Toolkit  C Edition  is a rapid prototyping and
+                                development tool for building ANSI C based agents best
+                                suited for device and System Management. The toolkit
+                                supports to provide common instrumentation on the agent
+                                and support multiple protocols for management of the agent.
+                                The protocols that are currently supported in this release
+                                are SNMP, TL1, HTTP and CLI."
+                REFERENCE               "The Agent Toolkit C Edition  is a rapid prototyping and
+                                development tool for building ANSI C based agents best
+                                suited for device and System Management. The toolkit
+                                supports to provide common instrumentation on the agent
+                                and support multiple protocols for management of the agent.
+                                The protocols that are currently supported in this release
+                                are SNMP, TL1, HTTP and CLI."
+                ::=  {  products  2  }
+
+        protocols       OBJECT IDENTIFIER
+                ::=  {  cagent  2  }
+
+
+--
+-- The various groups defined within the "agent" group:
+--
+
+        cli     OBJECT IDENTIFIER
+                ::=  {  protocols  4  }
+
+
+
+--
+-- General information about the CLI agent like supported version, uptime,
+-- operation status, etc.
+--
+
+        cliVersion      OBJECT-TYPE
+                SYNTAX                  DisplayString
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "CLI agent (adapter) version."
+                ::=  {  cli  1  }
+
+        cliUpTime       OBJECT-TYPE
+                SYNTAX                  TimeTicks
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "CLI agent(adapter) uptime in hundredths second."
+                ::=  {  cli  2  }
+
+        cliOperStatus   OBJECT-TYPE
+                SYNTAX                  CLIProtocolOperStatus
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "CLI agent (adapter) status, if it is one (1) it means
+                                CLI agent is running. If it is zero (0) it means CLI
+                                agent is not running."
+                ::=  {  cli  3  }
+
+
+--
+-- CLI communication table has supported transport protocols information.
+--
+        cliCommIfcTable OBJECT-TYPE
+                SYNTAX          SEQUENCE  OF  CliCommIfcEntry
+                MAX-ACCESS      not-accessible
+                STATUS          current
+                DESCRIPTION
+                        "CLI agent can support more than one transport
+                        protocol support like TCP/IP, Serial port, Telnet, etc
+                        This table is used to list out the supported
+                        transport protocols in the CLI agent."
+                ::=  { cli  4 }
+
+        cliCommIfcEntry OBJECT-TYPE
+                SYNTAX          CliCommIfcEntry
+                MAX-ACCESS      not-accessible
+                STATUS          current
+                DESCRIPTION
+                        "Each entry in this table describes about one supported
+                                transport protocol of CLI agent."
+                INDEX           {  cliCommIfcIndex  }
+                ::=  { cliCommIfcTable 1 }
+
+        CliCommIfcEntry  ::=  SEQUENCE {
+                cliCommIfcIndex  Integer32,
+                cliCommIfcType  CLICommunicationInterface,
+                cliCommIfcInfo  DisplayString
+                }
+
+
+        cliCommIfcIndex OBJECT-TYPE
+                SYNTAX                  Integer32
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "CLI communication interface index, it is just a numeric
+                                value which will be assigned during row creation."
+                ::=  {  cliCommIfcEntry  1  }
+
+
+        cliCommIfcType  OBJECT-TYPE
+                SYNTAX                  CLICommunicationInterface
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "The supported CLI communication interface type between NE and OSS."
+                ::=  {  cliCommIfcEntry  2  }
+
+
+        cliCommIfcInfo  OBJECT-TYPE
+                SYNTAX                  DisplayString
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "Detailed information about the supported CLI transport protocol."
+                ::=  {  cliCommIfcEntry  3  }
+
+
+--
+-- CLI
+--
+        cliTcpTable     OBJECT-TYPE
+                SYNTAX          SEQUENCE  OF  CliTcpEntry
+                MAX-ACCESS      not-accessible
+                STATUS          current
+                DESCRIPTION
+                        "Contains information about TCP/IP communication interface
+                        supported by the TL1 agent. By default TCP/IP interface is
+                        supported in the agent. Also the agent will support more than
+                        one connection (port number) to access agent data. This table
+                        contains all supported connection information"
+                ::=  { cli  5 }
+
+        cliTcpEntry     OBJECT-TYPE
+                SYNTAX          CliTcpEntry
+                MAX-ACCESS      not-accessible
+                STATUS          current
+                DESCRIPTION
+                        "Each row stores one TCP/IP connection information like port number
+                        IP address, Operational status, etc."
+                INDEX           {  cliTcpConnType, cliTcpConnIpAddress, cliTcpConnPortNumber  }
+                ::=  { cliTcpTable 1 }
+
+        CliTcpEntry  ::=  SEQUENCE {
+		cliTcpConnType      InetAddressType,
+                cliTcpConnIpAddress  InetAddress,
+                cliTcpConnPortNumber  Integer32,
+                cliTcpConnStatus  CLITcpConnectionState
+                }
+	cliTcpConnType	OBJECT-TYPE	
+		SYNTAX			InetAddressType
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		"The InetAddressType for the CLI TCP Table."
+		DEFVAL			{ 1 }
+		::=  {  cliTcpEntry  1 }
+
+        cliTcpConnIpAddress     OBJECT-TYPE
+                SYNTAX                  InetAddress
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "IP address used for this connection."
+                ::=  {  cliTcpEntry  2  }
+
+
+        cliTcpConnPortNumber    OBJECT-TYPE
+                SYNTAX                  Integer32
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "Port number used for this connection."
+                ::=  {  cliTcpEntry  3  }
+
+
+        cliTcpConnStatus        OBJECT-TYPE
+                SYNTAX                  CLITcpConnectionState
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "The state of this TCP/IP connection. The state will be either
+                                Operational or Blocked."
+                ::=  {  cliTcpEntry  4  }
+
+
+        cliSecurity     OBJECT IDENTIFIER
+                ::=  {  cli  6  }
+
+        cliUserSecurityTable    OBJECT-TYPE
+                SYNTAX          SEQUENCE  OF  CliUserSecurityEntry
+                MAX-ACCESS      not-accessible
+                STATUS          current
+                DESCRIPTION
+                        "user security view details"
+                ::=  { cliSecurity  1 }
+
+        cliUserSecurityEntry    OBJECT-TYPE
+                SYNTAX          CliUserSecurityEntry
+                MAX-ACCESS      not-accessible
+                STATUS          current
+                DESCRIPTION
+                        "Row Description"
+                INDEX           {  cliUserID  }
+                ::=  { cliUserSecurityTable 1 }
+
+        CliUserSecurityEntry  ::=  SEQUENCE {
+                cliUserID  DisplayString,
+                cliPassword  DisplayString,
+                cliPage  Integer32,
+                cliUout  Integer32,
+                cliUap  DisplayString,
+                cliUserSecurowstatus  RowStatus
+                }
+
+
+        cliUserID       OBJECT-TYPE
+                SYNTAX                  DisplayString
+                MAX-ACCESS              read-only
+                STATUS                  current
+                DESCRIPTION
+                        "user name"
+                ::=  {  cliUserSecurityEntry  1  }
+
+
+        cliPassword     OBJECT-TYPE
+                SYNTAX                  DisplayString
+                MAX-ACCESS              read-create
+                STATUS                  current
+                DESCRIPTION
+                        "password  for username"
+                ::=  {  cliUserSecurityEntry  2  }
+
+
+        cliPage OBJECT-TYPE
+                SYNTAX                  Integer32
+                MAX-ACCESS              read-create
+                STATUS                  current
+                DESCRIPTION
+                        "password ageing interval"
+                ::=  {  cliUserSecurityEntry  3  }
+
+
+        cliUout OBJECT-TYPE
+                SYNTAX                  Integer32
+                MAX-ACCESS              read-create
+                STATUS                  current
+                DESCRIPTION
+                        "user ID ageing due to inactiveness"
+                ::=  {  cliUserSecurityEntry  4  }
+
+
+        cliUap  OBJECT-TYPE
+                SYNTAX                  DisplayString
+                MAX-ACCESS              read-create
+                STATUS                  current
+                DESCRIPTION
+                        "user access previlages"
+                ::=  {  cliUserSecurityEntry  5  }
+
+
+        cliUserSecurowstatus    OBJECT-TYPE
+                SYNTAX                  RowStatus  { active ( 1 ) , notInService ( 2 ) , notReady ( 3 ) , createAndGo ( 4 ) , createAndWait ( 5 ) , destroy ( 6 ) }
+                MAX-ACCESS              read-create
+                STATUS                  current
+                DESCRIPTION
+                        "Description"
+                ::=  {  cliUserSecurityEntry  6  }
+
+END

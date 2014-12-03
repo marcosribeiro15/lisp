@@ -1,0 +1,12 @@
+TestModule2	DEFINITIONS ::= BEGIN
+IMPORTS
+		 enterprises 
+		FROM RFC1155-SMI;
+
+oid	OBJECT IDENTIFIER
+::=	{	enterprises	1
+	}
+
+
+
+END 

@@ -1,0 +1,147 @@
+
+-- File Name : SSITags
+-- Date      : Wed Jul 04 20:07:09 GMT+00:00 2001
+-- Author    : AdventNet Agent Toolkit (C Edition) - MibEditor 5.0
+
+SSI-TAGS-MIB DEFINITIONS ::= BEGIN
+	IMPORTS
+		enterprises, MODULE-IDENTITY, OBJECT-TYPE, IpAddress
+			FROM SNMPv2-SMI
+		DisplayString
+			FROM SNMPv2-TC
+		IpAddress,private
+			FROM RFC1155-SMI
+		DisplayString
+			FROM RFC1213-MIB;
+
+	adventnet	MODULE-IDENTITY
+		LAST-UPDATED	"200107041034Z"
+		ORGANIZATION	"Organization "
+		CONTACT-INFO	"Contact-info"
+		DESCRIPTION		
+				"Description"
+		REVISION		"200107041034Z"
+		DESCRIPTION		
+				""
+		::=  {  enterprises  1  }
+
+	enterprises	OBJECT IDENTIFIER
+		::=  {  private  1  }
+
+	products	OBJECT IDENTIFIER
+		::=  {  adventnet  1  }
+
+	agent	OBJECT IDENTIFIER
+		::=  {  products  1  }
+
+	parameters	OBJECT IDENTIFIER
+		::=  {  agent  1  }
+
+	operatingSystem	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Description"
+		::=  {  parameters  1  }
+
+	processesNum	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		
+				"Description"
+		::=  {  parameters  2  }
+
+	ipAddress	OBJECT-TYPE	
+		SYNTAX			IpAddress
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		
+				"Description"
+		::=  {  parameters  3  }
+
+	agentDisk	OBJECT IDENTIFIER
+		::=  {  agent  2  }
+
+	diskTable	OBJECT-TYPE
+		SYNTAX		SEQUENCE  OF  DiskEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	
+			"Description"
+		::=  { agentDisk  1 }
+
+	diskEntry	OBJECT-TYPE
+		SYNTAX		DiskEntry
+		MAX-ACCESS	not-accessible
+		STATUS		current
+		DESCRIPTION	
+			"Row Description"
+		INDEX		{  diskId  }
+		::=  { diskTable 1 }
+
+	DiskEntry  ::=  SEQUENCE {
+		diskId  Integer32,
+		diskName  DisplayString,
+		diskKByte  Unsigned32,
+		diskUsed  Unsigned32,
+		diskAvail  Unsigned32,
+		diskCapacity  Integer32
+		}
+
+
+	diskId	OBJECT-TYPE	
+		SYNTAX			Integer32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  diskEntry  1  }
+
+
+	diskName	OBJECT-TYPE	
+		SYNTAX			DisplayString
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  diskEntry  2  }
+
+
+	diskKByte	OBJECT-TYPE	
+		SYNTAX			Unsigned32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  diskEntry  3  }
+
+
+	diskUsed	OBJECT-TYPE	
+		SYNTAX			Unsigned32
+		MAX-ACCESS		read-write
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  diskEntry  4  }
+
+
+	diskAvail	OBJECT-TYPE	
+		SYNTAX			Unsigned32
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  diskEntry  5  }
+
+
+	diskCapacity	OBJECT-TYPE	
+		SYNTAX			Integer32  ( 0 .. 100  ) 
+		MAX-ACCESS		read-only
+		STATUS			current
+		DESCRIPTION		
+				"Column Description"
+		::=  {  diskEntry  6  }
+
+END
